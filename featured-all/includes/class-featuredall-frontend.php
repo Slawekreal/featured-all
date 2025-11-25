@@ -9,6 +9,9 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+/**
+ * Class Frontend
+ */
 class Frontend {
     private string $option_name = 'featuredall_settings';
 
@@ -19,36 +22,40 @@ class Frontend {
         add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
     }
 
+    /**
+     * Default settings.
+     */
     private function get_default_settings(): array {
         return array(
-            'post_types'                        => array( 'post' ),
-            'position'                          => 'below_title',
-            'hide_featured_image'               => 0,
-            'featured_image_selector'           => '.post-image, .post-thumbnail',
-            'player_controls'                   => 1,
-            'player_autoplay'                   => 0,
-            'player_muted'                      => 0,
-            'player_loop'                       => 0,
-            'player_preload'                    => 'metadata',
-            'player_max_width_mode'             => 'auto',
-            'player_max_width_value'            => '100',
-            'player_aspect_ratio_choice'        => '16:9',
-            'player_overlay_play_icon'          => 1,
-            'player_fade_in'                    => 1,
-            'player_controls_nodownload'        => 0,
-            'player_controls_noplaybackrate'    => 0,
-            'player_controls_disable_pip'       => 0,
-            'player_controls_hide_fullscreen'   => 0,
-            'player_fallback_controls'          => 0,
+            'post_types'              => array( 'post' ),
+            'position'                => 'below_title',
+            'hide_featured_image'     => 0,
+            'featured_image_selector' => '.post-image, .post-thumbnail',
+            'player_controls'         => 1,
+            'player_autoplay'         => 0,
+            'player_muted'            => 0,
+            'player_loop'             => 0,
+            'player_preload'          => 'metadata',
+            'player_max_width'        => '100%',
+            'player_aspect_ratio'     => '16:9',
+            'player_overlay_play_icon'=> 1,
+            'player_fade_in'          => 1,
         );
     }
 
+    /**
+     * Get settings with defaults.
+     */
     private function get_settings(): array {
         $defaults = $this->get_default_settings();
         $settings = get_option( $this->option_name, array() );
+
         return wp_parse_args( $settings, $defaults );
     }
 
+    /**
+     * Determine whether we should render on current post.
+     */
     private function should_render(): bool {
         if ( ! is_singular() || is_admin() ) {
             return false;
@@ -67,19 +74,28 @@ class Frontend {
         return $flag && ! empty( $url ) && 'unknown' !== $valid;
     }
 
+    /**
+     * Get the video type.
+     */
     private function get_video_type( string $url ): string {
         if ( empty( $url ) ) {
             return 'unknown';
         }
+
         if ( preg_match( '/\.mp4($|\?)/i', $url ) ) {
             return 'mp4';
         }
+
         if ( preg_match( '/(youtube\.com\/watch\?v=|youtu\.be\/)/i', $url ) ) {
             return 'youtube';
         }
+
         return 'extern';
     }
 
+    /**
+     * Build video markup.
+     */
     private function get_video_html( string $url, int $post_id ): string {
         $type     = $this->get_video_type( $url );
         $settings = $this->get_settings();
@@ -87,120 +103,78 @@ class Frontend {
             return '';
         }
 
-        $style      = $this->build_wrapper_style( $settings );
-        $classes    = array( 'featuredall-wrapper', 'featured-all-wrapper', 'featuredall-source-' . esc_attr( $type ) );
-        $wrapper_cl = implode( ' ', $classes );
+        $aspect    = $this->format_aspect_ratio( $settings['player_aspect_ratio'] );
+        $max_width = trim( $settings['player_max_width'] );
+        $classes   = array( 'featuredall-wrapper', 'featuredall-source-' . esc_attr( $type ) );
+
         if ( ! empty( $settings['player_fade_in'] ) ) {
-            $wrapper_cl .= ' featured-all-fade';
+            $classes[] = 'featured-all-fade';
         }
 
-        $html  = '<div class="' . esc_attr( $wrapper_cl ) . '" style="' . esc_attr( $style ) . '">';
-        $html .= '<div class="featuredall-inner">';
+        $style = '';
+        if ( $max_width ) {
+            $style .= 'max-width:' . esc_attr( $max_width ) . ';';
+        }
+        if ( $aspect ) {
+            $style .= '--featuredall-aspect:' . esc_attr( $aspect ) . ';';
+        }
+
+        $wrapper  = '<div class="' . esc_attr( implode( ' ', $classes ) ) . '"' . ( $style ? ' style="' . esc_attr( $style ) . '"' : '' ) . ' data-featuredall-fade="' . ( ! empty( $settings['player_fade_in'] ) ? '1' : '0' ) . '">';
+        $wrapper .= '<div class="featuredall-inner">';
 
         if ( 'mp4' === $type ) {
-            $html .= $this->build_mp4_player( $url, $post_id, $settings );
+            $wrapper .= $this->build_mp4_player( $url, $post_id, $settings );
         } else {
             $embed = wp_oembed_get( $url );
             if ( $embed ) {
-                $html .= '<div class="featuredall-embed">' . $embed . '</div>';
+                $wrapper .= '<div class="featuredall-embed">' . $embed . '</div>';
             }
         }
 
         if ( 'mp4' === $type && ! empty( $settings['player_overlay_play_icon'] ) ) {
-            $html .= '<div class="featuredall-overlay-play"><span class="featuredall-play-icon" aria-hidden="true">▶</span></div>';
+            $wrapper .= '<div class="featuredall-overlay-play"><span class="featuredall-play-icon" aria-hidden="true">▶</span></div>';
         }
 
-        if ( 'mp4' === $type && ! empty( $settings['player_fallback_controls'] ) ) {
-            $html .= '<div class="featuredall-fallback-controls" data-target="featuredall-player-' . esc_attr( $post_id ) . '"><button type="button" class="featuredall-fallback-toggle">⏯</button><span class="featuredall-fallback-time">0:00</span></div>';
-        }
+        $wrapper .= '</div></div>';
 
-        $html .= '</div></div>';
-        return $html;
-    }
-
-    private function build_wrapper_style( array $settings ): string {
-        $styles = array();
-        $mode   = $settings['player_max_width_mode'];
-        $value  = $settings['player_max_width_value'];
-
-        if ( 'percent' === $mode ) {
-            $styles[] = 'max-width:' . floatval( $value ) . '%';
-        } elseif ( 'px' === $mode ) {
-            $styles[] = 'max-width:' . floatval( $value ) . 'px';
-        } else {
-            $styles[] = 'max-width:100%';
-        }
-
-        $aspect = $this->aspect_to_ratio( $settings['player_aspect_ratio_choice'] );
-        if ( $aspect ) {
-            $styles[] = '--featuredall-aspect:' . $aspect;
-        }
-
-        return implode( ';', $styles );
-    }
-
-    private function aspect_to_ratio( string $value ): string {
-        $map = array(
-            '16:9' => '16/9',
-            '21:9' => '21/9',
-            '4:3'  => '4/3',
-            '1:1'  => '1/1',
-        );
-        if ( isset( $map[ $value ] ) ) {
-            return $map[ $value ];
-        }
-        return 'auto' === $value ? '16/9' : '16/9';
+        return $wrapper;
     }
 
     private function build_mp4_player( string $url, int $post_id, array $settings ): string {
         $attrs = array();
+
         if ( ! empty( $settings['player_controls'] ) ) {
             $attrs[] = 'controls';
         }
+
         if ( ! empty( $settings['player_autoplay'] ) ) {
             $attrs[] = 'autoplay';
             $attrs[] = 'muted';
         }
+
         if ( ! empty( $settings['player_muted'] ) ) {
             $attrs[] = 'muted';
         }
+
         if ( ! empty( $settings['player_loop'] ) ) {
             $attrs[] = 'loop';
         }
-        $preload  = in_array( $settings['player_preload'], array( 'auto', 'metadata', 'none' ), true ) ? $settings['player_preload'] : 'metadata';
-        $attrs[]  = 'preload="' . esc_attr( $preload ) . '"';
-        $controls = $this->build_controls_list( $settings );
-        if ( $controls ) {
-            $attrs[] = 'controlsList="' . esc_attr( $controls ) . '"';
-        }
-        if ( ! empty( $settings['player_controls_disable_pip'] ) ) {
-            $attrs[] = 'disablepictureinpicture';
-            $attrs[] = 'playsinline';
-        }
+
+        $preload = in_array( $settings['player_preload'], array( 'auto', 'metadata', 'none' ), true ) ? $settings['player_preload'] : 'metadata';
+        $attrs[] = 'preload="' . esc_attr( $preload ) . '"';
+
         $poster = $this->get_poster_url( $post_id );
         if ( $poster ) {
             $attrs[] = 'poster="' . esc_url( $poster ) . '"';
         }
-        $attrs[] = 'id="featuredall-player-' . esc_attr( $post_id ) . '"';
+
+        $attrs[] = 'playsinline';
 
         $player  = '<video class="featured-all-player" src="' . esc_url( $url ) . '" ' . implode( ' ', array_unique( $attrs ) ) . '>';
         $player .= esc_html__( 'Dein Browser unterstützt dieses Video-Format nicht.', 'featured-all' );
         $player .= '</video>';
-        return $player;
-    }
 
-    private function build_controls_list( array $settings ): string {
-        $items = array();
-        if ( ! empty( $settings['player_controls_nodownload'] ) ) {
-            $items[] = 'nodownload';
-        }
-        if ( ! empty( $settings['player_controls_noplaybackrate'] ) ) {
-            $items[] = 'noplaybackrate';
-        }
-        if ( ! empty( $settings['player_controls_hide_fullscreen'] ) ) {
-            $items[] = 'nofullscreen';
-        }
-        return implode( ' ', $items );
+        return $player;
     }
 
     private function get_poster_url( int $post_id ): string {
@@ -211,91 +185,121 @@ class Frontend {
                 return $poster;
             }
         }
+
         return '';
     }
 
+    private function format_aspect_ratio( string $value ): string {
+        if ( empty( $value ) ) {
+            return '16/9';
+        }
+
+        if ( preg_match( '/^(\d+)\s*:\s*(\d+)$/', $value, $matches ) ) {
+            $a = (int) $matches[1];
+            $b = (int) $matches[2];
+            if ( $a > 0 && $b > 0 ) {
+                return $a . '/' . $b;
+            }
+        }
+
+        return '16/9';
+    }
+
+    /**
+     * Inject video before content when position is below title.
+     */
     public function inject_video_below_title( string $content ): string {
         $settings = $this->get_settings();
         if ( 'below_title' !== $settings['position'] ) {
             return $content;
         }
+
         if ( ! $this->should_render() ) {
             return $content;
         }
+
         $url        = get_post_meta( get_the_ID(), '_fall_url', true );
         $video_html = $this->get_video_html( $url, get_the_ID() );
+
         if ( empty( $video_html ) ) {
             return $content;
         }
+
         return $video_html . $content;
     }
 
+    /**
+     * Inject video above the title.
+     */
     public function inject_video_above_title( string $title, int $post_id ): string {
         if ( ! in_the_loop() || ! is_main_query() ) {
             return $title;
         }
+
         $settings = $this->get_settings();
         if ( 'above_title' !== $settings['position'] ) {
             return $title;
         }
+
         if ( ! $this->should_render() ) {
             return $title;
         }
-        if ( (int) get_the_ID() !== (int) $post_id ) {
+
+        $current_post = get_the_ID();
+        if ( (int) $current_post !== (int) $post_id ) {
             return $title;
         }
+
         $url        = get_post_meta( $post_id, '_fall_url', true );
         $video_html = $this->get_video_html( $url, $post_id );
+
         if ( empty( $video_html ) ) {
             return $title;
         }
+
         return $video_html . $title;
     }
 
+    /**
+     * Add body class when video is active.
+     */
     public function add_body_class( array $classes ): array {
         if ( $this->should_render() ) {
             $classes[] = 'fall-has-video';
-            $settings  = $this->get_settings();
-            if ( ! empty( $settings['player_controls_hide_fullscreen'] ) ) {
-                $classes[] = 'fall-hide-fullscreen';
-            }
         }
+
         return $classes;
     }
 
+    /**
+     * Enqueue frontend assets.
+     */
     public function enqueue_assets(): void {
         if ( is_admin() ) {
             return;
         }
+
         $settings = $this->get_settings();
+
         wp_enqueue_style( 'featuredall-frontend', FEATUREDALL_URL . 'assets/css/frontend.css', array(), FEATUREDALL_VERSION );
+
         if ( $this->should_render() ) {
             wp_enqueue_script( 'featuredall-frontend', FEATUREDALL_URL . 'assets/js/frontend.js', array(), FEATUREDALL_VERSION, true );
         }
 
-        if ( $this->should_render() && ( ! empty( $settings['hide_featured_image'] ) || ! empty( $settings['player_controls_hide_fullscreen'] ) ) ) {
-            $css = '';
-            if ( ! empty( $settings['hide_featured_image'] ) ) {
-                $selector = $settings['featured_image_selector'];
-                if ( ! empty( $selector ) ) {
-                    $selectors = array_map( 'trim', explode( ',', $selector ) );
-                    $selectors = array_filter( $selectors );
-                    if ( $selectors ) {
-                        $compiled = array();
-                        foreach ( $selectors as $sel ) {
-                            $compiled[] = '.single.fall-has-video ' . $sel;
-                        }
-                        $css .= implode( ', ', $compiled ) . ' { display: none !important; }';
+        if ( $this->should_render() && ! empty( $settings['hide_featured_image'] ) ) {
+            $selector = $settings['featured_image_selector'];
+            if ( ! empty( $selector ) ) {
+                $selectors = array_map( 'trim', explode( ',', $selector ) );
+                $selectors = array_filter( $selectors );
+                if ( $selectors ) {
+                    $compiled = array();
+                    foreach ( $selectors as $sel ) {
+                        $compiled[] = '.single.fall-has-video ' . $sel;
                     }
+                    $css = implode( ', ', $compiled ) . ' { display: none !important; }';
+                    wp_add_inline_style( 'featuredall-frontend', $css );
                 }
-            }
-
-            if ( ! empty( $settings['player_controls_hide_fullscreen'] ) ) {
-                $css .= ' video::-webkit-media-controls-fullscreen-button{display:none!important;} video::-webkit-media-controls-enclosure{overflow:hidden;}';
-            }
-
-            if ( $css ) {
-                wp_add_inline_style( 'featuredall-frontend', $css );
             }
         }
     }

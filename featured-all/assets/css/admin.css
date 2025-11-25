@@ -1,98 +1,57 @@
-.featuredall-poster-preview img {
-    max-width: 100%;
+.featuredall-wrapper-table img {
+    max-width: 80px;
     height: auto;
 }
 
-.featuredall-selected-file {
-    margin-left: 8px;
-    font-style: italic;
-}
-
-.featuredall-settings-wrap .nav-tab-wrapper {
-    margin-bottom: 16px;
-}
-
-.featuredall-tab-content {
-    display: none;
-    background: #fff;
-    padding: 16px;
-    border: 1px solid #ccd0d4;
-    margin-bottom: 16px;
-}
-
-.featuredall-field {
-    margin-bottom: 14px;
-}
-
-.featuredall-field__label {
-    display: block;
+.wrap table.widefat .column-primary strong {
     font-weight: 600;
-    margin-bottom: 4px;
 }
 
-.featuredall-slider-wrap {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.featuredall-width-slider,
-.featuredall-width-slider-px {
-    flex: 1;
-}
-
-.featuredall-width-slider-px {
-    display: none;
-}
-
-.featuredall-width-unit {
-    min-width: 24px;
-    display: inline-block;
+.wrap table.widefat td,
+.wrap table.widefat th {
+    vertical-align: middle;
 }
 
 .featuredall-dashboard .featuredall-stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 12px;
-    margin-bottom: 16px;
+    gap: 1rem;
+    margin: 1rem 0;
 }
 
-.featuredall-stat-box {
+.featuredall-dashboard .featuredall-stat-box {
     background: #fff;
-    padding: 12px;
-    border: 1px solid #ccd0d4;
-    border-radius: 6px;
-    text-align: center;
+    border: 1px solid #e2e2e2;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .featuredall-stat-label {
-    display: block;
+    margin: 0 0 0.35rem;
+    font-size: 0.95rem;
     color: #555;
 }
 
 .featuredall-stat-value {
-    font-size: 22px;
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 700;
 }
 
-.featuredall-table .featuredall-thumb-cell {
-    width: 160px;
+.featuredall-actions {
+    margin-top: 1rem;
 }
 
-.featuredall-table .featuredall-thumb-cell img {
-    max-width: 160px;
-    height: 90px;
-    object-fit: cover;
-    border-radius: 4px;
-    border: 1px solid #ccd0d4;
+.featuredall-thumb-cell img {
+    max-width: 80px;
+    height: auto;
+    display: block;
 }
 
-.featuredall-thumb-placeholder {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 160px;
-    height: 90px;
-    border: 1px dashed #ccd0d4;
-    border-radius: 4px;
-    font-size: 28px;
+.featuredall-poster-preview img {
+    max-width: 80px;
+    height: auto;
+    display: inline-block;
+    margin-left: 0.5rem;
 }

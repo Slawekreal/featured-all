@@ -44,68 +44,6 @@
         });
     }
 
-    function initTabs() {
-        var tabs = document.querySelectorAll('#featuredall-tabs .nav-tab');
-        var contents = document.querySelectorAll('.featuredall-tab-content');
-        if (!tabs.length || !contents.length) {
-            return;
-        }
-
-        function activate(tabKey) {
-            tabs.forEach(function(t) {
-                t.classList.toggle('nav-tab-active', t.getAttribute('data-tab') === tabKey);
-            });
-            contents.forEach(function(c) {
-                c.style.display = c.getAttribute('data-tab') === tabKey ? 'block' : 'none';
-            });
-        }
-
-        tabs.forEach(function(tab, index) {
-            tab.addEventListener('click', function(e) {
-                e.preventDefault();
-                activate(tab.getAttribute('data-tab'));
-            });
-            if (index === 0) {
-                activate(tab.getAttribute('data-tab'));
-            }
-        });
-    }
-
-    function syncWidthControls(wrapper) {
-        if (!wrapper) {
-            return;
-        }
-        var modeSelect = wrapper.querySelector('.featuredall-width-mode');
-        var sliderPercent = wrapper.querySelector('.featuredall-width-slider');
-        var sliderPx = wrapper.querySelector('.featuredall-width-slider-px');
-        var valueField = wrapper.querySelector('.featuredall-width-value');
-        var unit = wrapper.querySelector('.featuredall-width-unit');
-
-        function refresh(mode) {
-            sliderPercent.style.display = mode === 'percent' ? 'block' : 'none';
-            sliderPx.style.display = mode === 'px' ? 'block' : 'none';
-            unit.textContent = mode === 'px' ? 'px' : '%';
-            if (mode === 'auto') {
-                valueField.value = '100';
-                unit.textContent = '%';
-            }
-        }
-
-        modeSelect.addEventListener('change', function() {
-            refresh(modeSelect.value);
-        });
-
-        sliderPercent.addEventListener('input', function() {
-            valueField.value = sliderPercent.value;
-        });
-
-        sliderPx.addEventListener('input', function() {
-            valueField.value = sliderPx.value;
-        });
-
-        refresh(modeSelect.value);
-    }
-
     document.addEventListener('DOMContentLoaded', function() {
         var videoButtons = document.querySelectorAll('.featuredall-select-video');
         videoButtons.forEach(function(btn) {
@@ -134,8 +72,5 @@
                 preview: preview
             });
         });
-
-        document.querySelectorAll('.featuredall-slider-wrap').forEach(syncWidthControls);
-        initTabs();
     });
 })();
