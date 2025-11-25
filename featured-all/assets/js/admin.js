@@ -44,6 +44,111 @@
         });
     }
 
+    function initTabs() {
+        var tabs = document.querySelectorAll('#featuredall-tabs .nav-tab');
+        var contents = document.querySelectorAll('.featuredall-tab-content');
+        var wrapper = document.querySelector('.featuredall-settings-wrap');
+        if (!tabs.length || !contents.length || !wrapper) {
+            return;
+        }
+
+        wrapper.classList.add('featuredall-tabs-enabled');
+
+        function activate(tabKey) {
+            tabs.forEach(function(t) {
+                t.classList.toggle('nav-tab-active', t.getAttribute('data-tab') === tabKey);
+            });
+            contents.forEach(function(c) {
+                var isActive = c.getAttribute('data-tab') === tabKey;
+                c.classList.toggle('is-active', isActive);
+                c.style.display = isActive ? 'block' : 'none';
+            });
+        }
+
+        var initial = tabs[0].getAttribute('data-tab');
+        if (window.location.hash) {
+            var hash = window.location.hash.replace('#', '');
+            tabs.forEach(function(tab) {
+                if (tab.getAttribute('data-tab') === hash) {
+                    initial = hash;
+                }
+            });
+        }
+
+        tabs.forEach(function(tab) {
+            tab.addEventListener('click', function(e) {
+                e.preventDefault();
+                activate(tab.getAttribute('data-tab'));
+            });
+        });
+
+        activate(initial);
+    }
+
+    function syncWidthControls(wrapper) {
+        if (!wrapper) {
+            return;
+        }
+        var modeSelect = wrapper.querySelector('.featuredall-width-mode');
+        var sliderPercent = wrapper.querySelector('.featuredall-width-slider');
+        var sliderPx = wrapper.querySelector('.featuredall-width-slider-px');
+        var valueField = wrapper.querySelector('.featuredall-width-value');
+        var unit = wrapper.querySelector('.featuredall-width-unit');
+
+        function clamp(val, min, max) {
+            var num = parseFloat(val);
+            if (isNaN(num)) {
+                return min;
+            }
+            return Math.min(Math.max(num, min), max);
+        }
+
+        function refresh(mode) {
+            wrapper.classList.toggle('is-disabled', mode === 'auto');
+            sliderPercent.style.display = mode === 'percent' || mode === 'auto' ? 'block' : 'none';
+            sliderPx.style.display = mode === 'px' ? 'block' : 'none';
+            unit.textContent = mode === 'px' ? 'px' : '%';
+
+            if (mode === 'auto') {
+                sliderPercent.value = '100';
+                valueField.value = '100';
+            } else if (mode === 'percent') {
+                valueField.value = clamp(valueField.value || sliderPercent.value, 25, 100);
+                sliderPercent.value = valueField.value;
+            } else if (mode === 'px') {
+                valueField.value = clamp(valueField.value || sliderPx.value, 320, 1920);
+                sliderPx.value = valueField.value;
+            }
+        }
+
+        modeSelect.addEventListener('change', function() {
+            refresh(modeSelect.value);
+        });
+
+        sliderPercent.addEventListener('input', function() {
+            valueField.value = sliderPercent.value;
+        });
+
+        sliderPx.addEventListener('input', function() {
+            valueField.value = sliderPx.value;
+        });
+
+        valueField.addEventListener('input', function() {
+            var mode = modeSelect.value;
+            if (mode === 'percent') {
+                var clampedPercent = clamp(valueField.value, 25, 100);
+                valueField.value = clampedPercent;
+                sliderPercent.value = clampedPercent;
+            } else if (mode === 'px') {
+                var clampedPx = clamp(valueField.value, 320, 1920);
+                valueField.value = clampedPx;
+                sliderPx.value = clampedPx;
+            }
+        });
+
+        refresh(modeSelect.value);
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         var videoButtons = document.querySelectorAll('.featuredall-select-video');
         videoButtons.forEach(function(btn) {
@@ -72,5 +177,8 @@
                 preview: preview
             });
         });
+
+        document.querySelectorAll('.featuredall-slider-wrap').forEach(syncWidthControls);
+        initTabs();
     });
 })();

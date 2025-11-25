@@ -3,12 +3,18 @@
  * Plugin Name: Featured All
  * Plugin URI: https://example.com/
  * Description: Adds featured video support alongside featured images with admin management pages and frontend output controls.
- * Version: 1.1.0
+ * Version: 1.3.0
  * Author: @Slawekreal
  * Text Domain: featured-all
  * Requires at least: 6.0
  * Requires PHP: 8.0
  * Tested up to: 8.3
+ */
+/*
+ * Changelog 1.3.0
+ * - Verbesserte Tab-Navigation mit No-JS-Fallback und optimierten Slider-Steuerungen.
+ * - Verfeinerte HTML5-Player-Optionen inkl. controlsList und Fallback-Controls.
+ * - Optimierte Video-Thumbnails im Backend sowie breiten-/seitenverhältnisabhängiges Layout im Frontend.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -20,7 +26,7 @@ if ( ! class_exists( 'Featured_All_Plugin' ) ) {
      * Main plugin loader.
      */
     class Featured_All_Plugin {
-        public const VERSION = '1.1.0';
+        public const VERSION = '1.3.0';
 
         public function __construct() {
             $this->define_constants();
