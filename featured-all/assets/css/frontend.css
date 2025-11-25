@@ -1,0 +1,22 @@
+.featuredall-wrapper {
+    position: relative;
+    width: 100%;
+    margin-bottom: 1.5em;
+    background: #000;
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+}
+
+.featuredall-wrapper iframe,
+.featuredall-wrapper video,
+.featuredall-wrapper .featuredall-player {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.featuredall-wrapper video {
+    background: #000;
+}
