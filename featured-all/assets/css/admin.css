@@ -1,0 +1,98 @@
+.featuredall-poster-preview img {
+    max-width: 100%;
+    height: auto;
+}
+
+.featuredall-selected-file {
+    margin-left: 8px;
+    font-style: italic;
+}
+
+.featuredall-settings-wrap .nav-tab-wrapper {
+    margin-bottom: 16px;
+}
+
+.featuredall-tab-content {
+    display: none;
+    background: #fff;
+    padding: 16px;
+    border: 1px solid #ccd0d4;
+    margin-bottom: 16px;
+}
+
+.featuredall-field {
+    margin-bottom: 14px;
+}
+
+.featuredall-field__label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.featuredall-slider-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.featuredall-width-slider,
+.featuredall-width-slider-px {
+    flex: 1;
+}
+
+.featuredall-width-slider-px {
+    display: none;
+}
+
+.featuredall-width-unit {
+    min-width: 24px;
+    display: inline-block;
+}
+
+.featuredall-dashboard .featuredall-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.featuredall-stat-box {
+    background: #fff;
+    padding: 12px;
+    border: 1px solid #ccd0d4;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.featuredall-stat-label {
+    display: block;
+    color: #555;
+}
+
+.featuredall-stat-value {
+    font-size: 22px;
+}
+
+.featuredall-table .featuredall-thumb-cell {
+    width: 160px;
+}
+
+.featuredall-table .featuredall-thumb-cell img {
+    max-width: 160px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid #ccd0d4;
+}
+
+.featuredall-thumb-placeholder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 160px;
+    height: 90px;
+    border: 1px dashed #ccd0d4;
+    border-radius: 4px;
+    font-size: 28px;
+}
