@@ -3,7 +3,7 @@
  * Plugin Name: Featured All
  * Plugin URI: https://example.com/
  * Description: Adds featured video support alongside featured images with admin management pages and frontend output controls.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Author: @Slawekreal
  * Text Domain: featured-all
  * Requires at least: 6.0
@@ -20,7 +20,7 @@ if ( ! class_exists( 'Featured_All_Plugin' ) ) {
      * Main plugin loader.
      */
     class Featured_All_Plugin {
-        public const VERSION = '1.0.0';
+        public const VERSION = '1.1.0';
 
         public function __construct() {
             $this->define_constants();

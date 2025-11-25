@@ -23,16 +23,31 @@ class Frontend {
     }
 
     /**
-     * Get settings with defaults.
+     * Default settings.
      */
-    private function get_settings(): array {
-        $defaults = array(
+    private function get_default_settings(): array {
+        return array(
             'post_types'              => array( 'post' ),
             'position'                => 'below_title',
             'hide_featured_image'     => 0,
             'featured_image_selector' => '.post-image, .post-thumbnail',
+            'player_controls'         => 1,
+            'player_autoplay'         => 0,
+            'player_muted'            => 0,
+            'player_loop'             => 0,
+            'player_preload'          => 'metadata',
+            'player_max_width'        => '100%',
+            'player_aspect_ratio'     => '16:9',
+            'player_overlay_play_icon'=> 1,
+            'player_fade_in'          => 1,
         );
+    }
 
+    /**
+     * Get settings with defaults.
+     */
+    private function get_settings(): array {
+        $defaults = $this->get_default_settings();
         $settings = get_option( $this->option_name, array() );
 
         return wp_parse_args( $settings, $defaults );
@@ -75,33 +90,119 @@ class Frontend {
             return 'youtube';
         }
 
-        return 'unknown';
+        return 'extern';
     }
 
     /**
      * Build video markup.
      */
-    private function get_video_html( string $url ): string {
-        $type = $this->get_video_type( $url );
+    private function get_video_html( string $url, int $post_id ): string {
+        $type     = $this->get_video_type( $url );
+        $settings = $this->get_settings();
         if ( 'unknown' === $type ) {
             return '';
         }
 
+        $aspect    = $this->format_aspect_ratio( $settings['player_aspect_ratio'] );
+        $max_width = trim( $settings['player_max_width'] );
+        $classes   = array( 'featuredall-wrapper', 'featuredall-source-' . esc_attr( $type ) );
+
+        if ( ! empty( $settings['player_fade_in'] ) ) {
+            $classes[] = 'featured-all-fade';
+        }
+
+        $style = '';
+        if ( $max_width ) {
+            $style .= 'max-width:' . esc_attr( $max_width ) . ';';
+        }
+        if ( $aspect ) {
+            $style .= '--featuredall-aspect:' . esc_attr( $aspect ) . ';';
+        }
+
+        $wrapper  = '<div class="' . esc_attr( implode( ' ', $classes ) ) . '"' . ( $style ? ' style="' . esc_attr( $style ) . '"' : '' ) . ' data-featuredall-fade="' . ( ! empty( $settings['player_fade_in'] ) ? '1' : '0' ) . '">';
+        $wrapper .= '<div class="featuredall-inner">';
+
         if ( 'mp4' === $type ) {
-            $html  = '<div class="featuredall-wrapper featuredall-wrapper--mp4">';
-            $html .= '<video class="featuredall-player" controls preload="metadata">';
-            $html .= '<source src="' . esc_url( $url ) . '" type="video/mp4" />';
-            $html .= esc_html__( 'Your browser does not support the video tag.', 'featured-all' );
-            $html .= '</video></div>';
-            return $html;
+            $wrapper .= $this->build_mp4_player( $url, $post_id, $settings );
+        } else {
+            $embed = wp_oembed_get( $url );
+            if ( $embed ) {
+                $wrapper .= '<div class="featuredall-embed">' . $embed . '</div>';
+            }
         }
 
-        $embed = wp_oembed_get( $url );
-        if ( ! $embed ) {
-            return '';
+        if ( 'mp4' === $type && ! empty( $settings['player_overlay_play_icon'] ) ) {
+            $wrapper .= '<div class="featuredall-overlay-play"><span class="featuredall-play-icon" aria-hidden="true">▶</span></div>';
         }
 
-        return '<div class="featuredall-wrapper featuredall-wrapper--youtube">' . $embed . '</div>';
+        $wrapper .= '</div></div>';
+
+        return $wrapper;
+    }
+
+    private function build_mp4_player( string $url, int $post_id, array $settings ): string {
+        $attrs = array();
+
+        if ( ! empty( $settings['player_controls'] ) ) {
+            $attrs[] = 'controls';
+        }
+
+        if ( ! empty( $settings['player_autoplay'] ) ) {
+            $attrs[] = 'autoplay';
+            $attrs[] = 'muted';
+        }
+
+        if ( ! empty( $settings['player_muted'] ) ) {
+            $attrs[] = 'muted';
+        }
+
+        if ( ! empty( $settings['player_loop'] ) ) {
+            $attrs[] = 'loop';
+        }
+
+        $preload = in_array( $settings['player_preload'], array( 'auto', 'metadata', 'none' ), true ) ? $settings['player_preload'] : 'metadata';
+        $attrs[] = 'preload="' . esc_attr( $preload ) . '"';
+
+        $poster = $this->get_poster_url( $post_id );
+        if ( $poster ) {
+            $attrs[] = 'poster="' . esc_url( $poster ) . '"';
+        }
+
+        $attrs[] = 'playsinline';
+
+        $player  = '<video class="featured-all-player" src="' . esc_url( $url ) . '" ' . implode( ' ', array_unique( $attrs ) ) . '>';
+        $player .= esc_html__( 'Dein Browser unterstützt dieses Video-Format nicht.', 'featured-all' );
+        $player .= '</video>';
+
+        return $player;
+    }
+
+    private function get_poster_url( int $post_id ): string {
+        $poster_id = (int) get_post_meta( $post_id, '_fall_video_poster_id', true );
+        if ( $poster_id ) {
+            $poster = wp_get_attachment_image_url( $poster_id, 'large' );
+            if ( $poster ) {
+                return $poster;
+            }
+        }
+
+        return '';
+    }
+
+    private function format_aspect_ratio( string $value ): string {
+        if ( empty( $value ) ) {
+            return '16/9';
+        }
+
+        if ( preg_match( '/^(\d+)\s*:\s*(\d+)$/', $value, $matches ) ) {
+            $a = (int) $matches[1];
+            $b = (int) $matches[2];
+            if ( $a > 0 && $b > 0 ) {
+                return $a . '/' . $b;
+            }
+        }
+
+        return '16/9';
     }
 
     /**
@@ -118,7 +219,7 @@ class Frontend {
         }
 
         $url        = get_post_meta( get_the_ID(), '_fall_url', true );
-        $video_html = $this->get_video_html( $url );
+        $video_html = $this->get_video_html( $url, get_the_ID() );
 
         if ( empty( $video_html ) ) {
             return $content;
@@ -150,7 +251,7 @@ class Frontend {
         }
 
         $url        = get_post_meta( $post_id, '_fall_url', true );
-        $video_html = $this->get_video_html( $url );
+        $video_html = $this->get_video_html( $url, $post_id );
 
         if ( empty( $video_html ) ) {
             return $title;
@@ -181,6 +282,10 @@ class Frontend {
         $settings = $this->get_settings();
 
         wp_enqueue_style( 'featuredall-frontend', FEATUREDALL_URL . 'assets/css/frontend.css', array(), FEATUREDALL_VERSION );
+
+        if ( $this->should_render() ) {
+            wp_enqueue_script( 'featuredall-frontend', FEATUREDALL_URL . 'assets/js/frontend.js', array(), FEATUREDALL_VERSION, true );
+        }
 
         if ( $this->should_render() && ! empty( $settings['hide_featured_image'] ) ) {
             $selector = $settings['featured_image_selector'];
