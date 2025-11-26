@@ -27,6 +27,7 @@
         if (!video || !overlay) {
             return;
         }
+        overlay.classList.add('is-ready');
         var hideOverlay = function() {
             if (!overlay) {
                 return;

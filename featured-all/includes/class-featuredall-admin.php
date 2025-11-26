@@ -371,12 +371,12 @@ class Admin {
             <p class="description"><?php printf( esc_html__( 'Version %s – alle bestehenden Einstellungen bleiben beim Update erhalten.', 'featured-all' ), esc_html( FEATUREDALL_VERSION ) ); ?></p>
             <h2 class="nav-tab-wrapper" id="featuredall-tabs">
                 <?php foreach ( $tabs as $key => $label ) : ?>
-                    <a href="#" class="nav-tab" data-tab="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></a>
+                    <a href="#featuredall-tab-<?php echo esc_attr( $key ); ?>" class="nav-tab" data-tab="<?php echo esc_attr( $key ); ?>" aria-controls="featuredall-tab-<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></a>
                 <?php endforeach; ?>
             </h2>
             <form action="options.php" method="post" id="featuredall-settings-form">
                 <?php settings_fields( 'featuredall_settings_group' ); ?>
-                <div class="featuredall-tab-content" data-tab="general">
+                <div class="featuredall-tab-content" data-tab="general" id="featuredall-tab-general">
                     <h2><?php esc_html_e( 'Allgemein', 'featured-all' ); ?></h2>
                     <p class="description"><?php esc_html_e( 'Grundsätzliche Aktivierung und Platzierung des Videos im Beitrag.', 'featured-all' ); ?></p>
                     <?php $this->render_post_types_field(); ?>
@@ -384,7 +384,7 @@ class Admin {
                     <?php $this->render_hide_image_field(); ?>
                     <?php $this->render_selector_field(); ?>
                 </div>
-                <div class="featuredall-tab-content" data-tab="player">
+                <div class="featuredall-tab-content" data-tab="player" id="featuredall-tab-player">
                     <h2><?php esc_html_e( 'HTML5-Player', 'featured-all' ); ?></h2>
                     <p class="description"><?php esc_html_e( 'Steuerelemente und Verhalten des nativen Players.', 'featured-all' ); ?></p>
                     <?php $this->render_player_controls_field(); ?>
@@ -395,7 +395,7 @@ class Admin {
                     <?php $this->render_player_overlay_field(); ?>
                     <?php $this->render_player_fade_field(); ?>
                 </div>
-                <div class="featuredall-tab-content" data-tab="advanced">
+                <div class="featuredall-tab-content" data-tab="advanced" id="featuredall-tab-advanced">
                     <h2><?php esc_html_e( 'Erweiterte Player-Optionen', 'featured-all' ); ?></h2>
                     <p class="description"><?php esc_html_e( 'Feintuning für controlsList, Bild-in-Bild und eine einfache Fallback-Leiste.', 'featured-all' ); ?></p>
                     <?php $this->render_player_nodownload_field(); ?>
@@ -404,18 +404,19 @@ class Admin {
                     <?php $this->render_player_fullscreen_field(); ?>
                     <?php $this->render_player_fallback_controls_field(); ?>
                 </div>
-                <div class="featuredall-tab-content" data-tab="layout">
+                <div class="featuredall-tab-content" data-tab="layout" id="featuredall-tab-layout">
                     <h2><?php esc_html_e( 'Layout & Größe', 'featured-all' ); ?></h2>
                     <p class="description"><?php esc_html_e( 'Steuere maximale Breite und Seitenverhältnis über Moduswahl und Slider.', 'featured-all' ); ?></p>
                     <?php $this->render_player_max_width_field(); ?>
                     <?php $this->render_player_aspect_ratio_field(); ?>
+                    <?php $this->render_layout_preview(); ?>
                 </div>
-                <div class="featuredall-tab-content" data-tab="media">
+                <div class="featuredall-tab-content" data-tab="media" id="featuredall-tab-media">
                     <h2><?php esc_html_e( 'Medien & Thumbnails', 'featured-all' ); ?></h2>
                     <p class="description"><?php esc_html_e( 'Poster-Bilder und Thumbnails werden automatisch aus den Beitragsdaten gezogen. Weitere Optionen folgen.', 'featured-all' ); ?></p>
                     <p class="description"><?php esc_html_e( 'Hinweis: Poster aus der Metabox haben Priorität, danach Beitragsbild oder Video-Anhang.', 'featured-all' ); ?></p>
                 </div>
-                <div class="featuredall-tab-content" data-tab="future">
+                <div class="featuredall-tab-content" data-tab="future" id="featuredall-tab-future">
                     <h2><?php esc_html_e( 'Coming Soon', 'featured-all' ); ?></h2>
                     <p class="description"><?php esc_html_e( 'Weitere Funktionen folgen in zukünftigen Versionen. (Coming soon)', 'featured-all' ); ?></p>
                     <ul class="ul-disc">
@@ -676,7 +677,7 @@ class Admin {
                     <option value="percent" <?php selected( $mode, 'percent' ); ?>><?php esc_html_e( 'Prozent', 'featured-all' ); ?></option>
                     <option value="px" <?php selected( $mode, 'px' ); ?>><?php esc_html_e( 'Pixel', 'featured-all' ); ?></option>
                 </select>
-                <div class="featuredall-slider-wrap" data-mode="<?php echo esc_attr( $mode ); ?>">
+                <div class="featuredall-slider-wrap" data-mode="<?php echo esc_attr( $mode ); ?>" data-preview-target="#featuredall-layout-preview .featuredall-wrapper">
                     <input type="range" class="featuredall-width-slider" min="25" max="100" step="5" value="<?php echo esc_attr( $value ); ?>" style="display: <?php echo 'px' === $mode ? 'none' : 'block'; ?>;" />
                     <input type="range" class="featuredall-width-slider-px" min="320" max="1920" step="20" value="<?php echo esc_attr( $value ); ?>" style="display: <?php echo 'px' === $mode ? 'block' : 'none'; ?>;" />
                     <input type="text" class="small-text featuredall-width-value" name="<?php echo esc_attr( $this->option_name ); ?>[player_max_width_value]" value="<?php echo esc_attr( $value ); ?>" />
@@ -701,7 +702,7 @@ class Admin {
             __( 'Wähle ein Seitenverhältnis für den Player.', 'featured-all' ),
             function() use ( $settings, $options ) {
                 ?>
-                <select name="<?php echo esc_attr( $this->option_name ); ?>[player_aspect_ratio_choice]">
+                <select name="<?php echo esc_attr( $this->option_name ); ?>[player_aspect_ratio_choice]" class="featuredall-aspect-choice">
                     <?php foreach ( $options as $value => $label ) : ?>
                         <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $settings['player_aspect_ratio_choice'], $value ); ?>><?php echo esc_html( $label ); ?></option>
                     <?php endforeach; ?>
@@ -709,6 +710,68 @@ class Admin {
                 <?php
             }
         );
+    }
+
+    private function render_layout_preview(): void {
+        $style = $this->build_layout_preview_style( $this->get_settings() );
+        ?>
+        <div class="featuredall-layout-preview" id="featuredall-layout-preview">
+            <p class="description"><?php esc_html_e( 'Live-Preview für Breite und Seitenverhältnis (funktioniert mit aktivem JavaScript).', 'featured-all' ); ?></p>
+            <div class="featuredall-wrapper featured-all-wrapper" style="<?php echo esc_attr( $style ); ?>">
+                <div class="featuredall-inner">
+                    <div class="featuredall-layout-preview-box"><?php esc_html_e( 'Video-Vorschau', 'featured-all' ); ?></div>
+                </div>
+            </div>
+        </div>
+        <?php
+    }
+
+    private function build_layout_preview_style( array $settings ): string {
+        $styles = array();
+        $mode   = $settings['player_max_width_mode'];
+        $value  = $settings['player_max_width_value'];
+
+        if ( 'percent' === $mode ) {
+            $styles[] = 'max-width:' . floatval( $value ) . '%';
+        } elseif ( 'px' === $mode ) {
+            $styles[] = 'max-width:' . floatval( $value ) . 'px';
+        } else {
+            $styles[] = 'max-width:100%';
+        }
+
+        $map = array(
+            '16:9' => array(
+                'ratio'    => '16/9',
+                'fallback' => '56.25%',
+            ),
+            '21:9' => array(
+                'ratio'    => '21/9',
+                'fallback' => '42.857%',
+            ),
+            '4:3'  => array(
+                'ratio'    => '4/3',
+                'fallback' => '75%',
+            ),
+            '1:1'  => array(
+                'ratio'    => '1/1',
+                'fallback' => '100%',
+            ),
+            'auto' => array(
+                'ratio'    => '',
+                'fallback' => '56.25%',
+            ),
+        );
+
+        $choice = $settings['player_aspect_ratio_choice'] ?? '16:9';
+        $aspect = $map[ $choice ] ?? $map['16:9'];
+        if ( $aspect['ratio'] ) {
+            $styles[] = '--featuredall-aspect:' . $aspect['ratio'];
+        }
+        if ( $aspect['fallback'] ) {
+            $styles[] = '--featuredall-aspect-fallback:' . $aspect['fallback'];
+        }
+
+        return implode( ';', array_filter( $styles ) );
     }
 
     /**

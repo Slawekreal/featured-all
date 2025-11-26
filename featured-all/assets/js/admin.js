@@ -67,7 +67,7 @@
 
         var initial = tabs[0].getAttribute('data-tab');
         if (window.location.hash) {
-            var hash = window.location.hash.replace('#', '');
+            var hash = window.location.hash.replace('#featuredall-tab-', '').replace('#', '');
             tabs.forEach(function(tab) {
                 if (tab.getAttribute('data-tab') === hash) {
                     initial = hash;
@@ -94,6 +94,8 @@
         var sliderPx = wrapper.querySelector('.featuredall-width-slider-px');
         var valueField = wrapper.querySelector('.featuredall-width-value');
         var unit = wrapper.querySelector('.featuredall-width-unit');
+        var previewSelector = wrapper.getAttribute('data-preview-target');
+        var preview = previewSelector ? document.querySelector(previewSelector) : null;
 
         function clamp(val, min, max) {
             var num = parseFloat(val);
@@ -101,6 +103,19 @@
                 return min;
             }
             return Math.min(Math.max(num, min), max);
+        }
+
+        function applyPreview(mode) {
+            if (!preview) {
+                return;
+            }
+            if (mode === 'percent') {
+                preview.style.maxWidth = clamp(valueField.value || sliderPercent.value, 25, 100) + '%';
+            } else if (mode === 'px') {
+                preview.style.maxWidth = clamp(valueField.value || sliderPx.value, 320, 1920) + 'px';
+            } else {
+                preview.style.maxWidth = '100%';
+            }
         }
 
         function refresh(mode) {
@@ -119,6 +134,8 @@
                 valueField.value = clamp(valueField.value || sliderPx.value, 320, 1920);
                 sliderPx.value = valueField.value;
             }
+
+            applyPreview(mode);
         }
 
         modeSelect.addEventListener('change', function() {
@@ -127,10 +144,12 @@
 
         sliderPercent.addEventListener('input', function() {
             valueField.value = sliderPercent.value;
+            applyPreview('percent');
         });
 
         sliderPx.addEventListener('input', function() {
             valueField.value = sliderPx.value;
+            applyPreview('px');
         });
 
         valueField.addEventListener('input', function() {
@@ -144,9 +163,41 @@
                 valueField.value = clampedPx;
                 sliderPx.value = clampedPx;
             }
+            applyPreview(mode);
         });
 
         refresh(modeSelect.value);
+    }
+
+    function initAspectPreview() {
+        var aspectSelect = document.querySelector('.featuredall-aspect-choice');
+        var preview = document.querySelector('#featuredall-layout-preview .featuredall-wrapper');
+        if (!aspectSelect || !preview) {
+            return;
+        }
+        var map = {
+            '16:9': { ratio: '16/9', fallback: '56.25%' },
+            '21:9': { ratio: '21/9', fallback: '42.857%' },
+            '4:3': { ratio: '4/3', fallback: '75%' },
+            '1:1': { ratio: '1/1', fallback: '100%' },
+            'auto': { ratio: '', fallback: '56.25%' }
+        };
+
+        function applyAspect(value) {
+            var current = map[value] || map['16:9'];
+            if (current.ratio) {
+                preview.style.setProperty('--featuredall-aspect', current.ratio);
+            } else {
+                preview.style.removeProperty('--featuredall-aspect');
+            }
+            preview.style.setProperty('--featuredall-aspect-fallback', current.fallback);
+        }
+
+        aspectSelect.addEventListener('change', function() {
+            applyAspect(aspectSelect.value);
+        });
+
+        applyAspect(aspectSelect.value);
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -180,5 +231,6 @@
 
         document.querySelectorAll('.featuredall-slider-wrap').forEach(syncWidthControls);
         initTabs();
+        initAspectPreview();
     });
 })();

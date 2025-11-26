@@ -28,6 +28,10 @@
     display: block;
 }
 
+.featuredall-tab-content:target {
+    display: block;
+}
+
 .featuredall-field {
     margin-bottom: 14px;
 }
@@ -62,6 +66,49 @@
 .featuredall-width-unit {
     min-width: 24px;
     display: inline-block;
+}
+
+.featuredall-layout-preview {
+    margin-top: 16px;
+}
+
+.featuredall-layout-preview .featuredall-wrapper {
+    background: #111;
+    border-radius: 6px;
+    border: 1px solid #ccd0d4;
+    max-width: 100%;
+    aspect-ratio: var(--featuredall-aspect, 16/9);
+    position: relative;
+}
+
+.featuredall-layout-preview .featuredall-layout-preview-box {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+}
+
+.featuredall-layout-preview .featuredall-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+@supports not (aspect-ratio: 1 / 1) {
+    .featuredall-layout-preview .featuredall-wrapper {
+        height: 0;
+        padding-top: var(--featuredall-aspect-fallback, 56.25%);
+    }
+
+    .featuredall-layout-preview .featuredall-inner {
+        position: absolute;
+        inset: 0;
+    }
 }
 
 .featuredall-dashboard .featuredall-stats {

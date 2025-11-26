@@ -14,7 +14,7 @@
         padding-top: var(--featuredall-aspect-fallback, 56.25%);
     }
 
-    .featuredall-wrapper .featuredall-inner {
+.featuredall-wrapper .featuredall-inner {
         position: absolute;
         top: 0;
         left: 0;
@@ -25,21 +25,33 @@
 
 .featuredall-inner {
     position: relative;
+    width: 100%;
+    height: 100%;
 }
 
 .featuredall-wrapper iframe,
 .featuredall-wrapper video,
 .featuredall-wrapper .featuredall-embed,
 .featuredall-wrapper .featured-all-player {
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     height: 100%;
+    display: block;
+    object-fit: cover;
 }
 
 .featuredall-wrapper video {
     background: #000;
+}
+
+@supports not (aspect-ratio: 1 / 1) {
+    .featuredall-wrapper iframe,
+    .featuredall-wrapper video,
+    .featuredall-wrapper .featuredall-embed,
+    .featuredall-wrapper .featured-all-player {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
 }
 
 .featuredall-overlay-play {
@@ -52,11 +64,16 @@
     transition: opacity 0.3s ease;
     cursor: pointer;
     z-index: 2;
+    pointer-events: none;
 }
 
 .featuredall-overlay-play.is-hidden {
     opacity: 0;
     pointer-events: none;
+}
+
+.featuredall-overlay-play.is-ready {
+    pointer-events: auto;
 }
 
 .featuredall-play-icon {
@@ -107,6 +124,14 @@
 
 .featuredall-wrapper.featuredall-source-youtube .featuredall-overlay-play {
     display: none;
+}
+
+.featuredall-wrapper video::-webkit-media-controls {
+    bottom: 0;
+}
+
+.featuredall-wrapper video::-webkit-media-controls-enclosure {
+    background: rgba(0, 0, 0, 0.45);
 }
 
 .fall-hide-fullscreen video::-webkit-media-controls-fullscreen-button {

@@ -114,11 +114,13 @@ class Frontend {
             $html .= '<div class="featuredall-overlay-play"><span class="featuredall-play-icon" aria-hidden="true">▶</span></div>';
         }
 
+        $html .= '</div>';
+
         if ( 'mp4' === $type && $render_fallback ) {
             $html .= '<div class="featuredall-fallback-controls" data-target="featuredall-player-' . esc_attr( $post_id ) . '"><button type="button" class="featuredall-fallback-toggle" aria-label="' . esc_attr__( 'Play/Pause', 'featured-all' ) . '">⏯</button><span class="featuredall-fallback-time">0:00 / 0:00</span></div>';
         }
 
-        $html .= '</div></div>';
+        $html .= '</div>';
         return $html;
     }
 
@@ -196,6 +198,7 @@ class Frontend {
         }
         if ( ! empty( $settings['player_controls_disable_pip'] ) ) {
             $attrs[] = 'disablepictureinpicture';
+            $attrs[] = 'disableRemotePlayback';
             $attrs[] = 'playsinline';
         }
         $attrs[] = 'playsinline';
