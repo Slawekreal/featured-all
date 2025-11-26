@@ -1,0 +1,139 @@
+.featuredall-wrapper {
+    position: relative;
+    width: 100%;
+    margin-bottom: 1.5em;
+    background: #000;
+    overflow: hidden;
+    aspect-ratio: var(--featuredall-aspect, 16/9);
+    max-width: 100%;
+}
+
+@supports not (aspect-ratio: 1 / 1) {
+    .featuredall-wrapper {
+        height: 0;
+        padding-top: var(--featuredall-aspect-fallback, 56.25%);
+    }
+
+.featuredall-wrapper .featuredall-inner {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+}
+
+.featuredall-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.featuredall-wrapper iframe,
+.featuredall-wrapper video,
+.featuredall-wrapper .featuredall-embed,
+.featuredall-wrapper .featured-all-player {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+.featuredall-wrapper video {
+    background: #000;
+}
+
+@supports not (aspect-ratio: 1 / 1) {
+    .featuredall-wrapper iframe,
+    .featuredall-wrapper video,
+    .featuredall-wrapper .featuredall-embed,
+    .featuredall-wrapper .featured-all-player {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+}
+
+.featuredall-overlay-play {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.65) 100%);
+    transition: opacity 0.3s ease;
+    cursor: pointer;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.featuredall-overlay-play.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.featuredall-overlay-play.is-ready {
+    pointer-events: auto;
+}
+
+.featuredall-play-icon {
+    font-size: 42px;
+    color: #fff;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+.featuredall-wrapper.featured-all-fade {
+    opacity: 0;
+    transition: opacity 0.4s ease-in-out;
+}
+
+.featuredall-wrapper.featured-all-fade.is-loaded {
+    opacity: 1;
+}
+
+.featuredall-fallback-controls {
+    position: relative;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 6px 8px;
+    background: #111;
+    color: #fff;
+    font-size: 13px;
+    border-radius: 4px;
+    margin-top: 6px;
+}
+
+.featuredall-fallback-controls button {
+    background: #fff;
+    color: #000;
+    border: 0;
+    border-radius: 3px;
+    padding: 4px 8px;
+    cursor: pointer;
+}
+
+.featuredall-fallback-controls.is-playing button {
+    background: #0abf53;
+    color: #fff;
+}
+
+.featuredall-fallback-time {
+    font-variant-numeric: tabular-nums;
+}
+
+.featuredall-wrapper.featuredall-source-youtube .featuredall-overlay-play {
+    display: none;
+}
+
+.featuredall-wrapper video::-webkit-media-controls {
+    bottom: 0;
+}
+
+.featuredall-wrapper video::-webkit-media-controls-enclosure {
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.fall-hide-fullscreen video::-webkit-media-controls-fullscreen-button {
+    display: none !important;
+}
